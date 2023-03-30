@@ -1,4 +1,9 @@
-import errors import *
+from .errors import *
+from .initial_population_generator import * 
+from .next_population_generator import *
+from .organism import *
+from .preprocessing import *
+from .fitness_function import *
 import tensorflow.keras as keras 
 import tensorflow as tf 
 import numpy as np 
@@ -11,7 +16,7 @@ import tensorflow.keras as keras
 
 class GeneticAlgorithm: 
     
-    def __init__(self), X_train, y_train, X_test, y_test: 
+    def __init__(self, X_train, y_train, X_test, y_test): 
         assert len(X_train) == len(y_train), "Number of datapoints in X_train and y_train, does'nt match"
         assert len(X_test) == len(y_test), "Number of datapoints in X_test and y_test, does'nt match"
         self.X_train = X_train 
@@ -21,7 +26,7 @@ class GeneticAlgorithm:
         self.mutation_rate = 0.1
         self.survival_rate = 0.60
     
-    def evolve(num_phase: int, num_generation: int, num_population: int, params: dict, verbose=True): 
+    def evolve(self, num_phase: int, num_generation: int, num_population: int, params: dict, verbose=True): 
         """
             - This function contains all the component of Variable Length Genetic Algorithm. It starts generating the 
                 initial population, and for that population fitness score will be computed, from that population, some of the 
@@ -33,7 +38,10 @@ class GeneticAlgorithm:
                 num_generation   : how many generation do we need to evolve our initial pop in each phase.
                 num_population   : size of the population.
                 params         : Dictionary, where key is hyperparameter, value is value of hyperparameter 
+            - returns
+                Tensorflow Model Object and Prediction Score of that model.
         """
+        assert type(num_phase) == int, "Phase datatype should be int"
         assert num_population % 2 == 0, "Input value for number of population, should be even."
         assert num_generation > 1, "Number of generation should be greater than 1"
         assert type(num_phase) == int, "Type Error: Int is required"
@@ -52,7 +60,7 @@ class GeneticAlgorithm:
 
             train_ds, test_ds, test_X, test_y = preprocess_data((self.X_train, self.y_train), (self.X_test, self.y_test))
             for phase in range(num_phase): 
-                print(f"phase: {phase}")
+                print(f"phase: {phase}") if verbose else None
                 population = generator.generate(
                     params, 
                     num_population,
@@ -63,8 +71,7 @@ class GeneticAlgorithm:
                     print(f"    Generation: {generation}") if verbose else None
 
                     fitness_scores, prediction_scores = fitness_function.get_fitness_score(population, train_ds, 
-                                                                                                   test_ds, test_X, test_y)
-                    print("prediction scores: ", prediction_scores) if verbose else None
+                                                                                                test_ds, test_X, test_y, verbose)
 
                     if len(population) != len(fitness_scores):
                         raise LengthError("Length of Fitness Scores and Population array does'nt match")
@@ -93,13 +100,18 @@ class GeneticAlgorithm:
 
                     mating_pool_fitness_scores = np.array(mating_pool_fitness_scores)
                     next_gen_population = get_next_generation_population(mating_pool_pop, mating_pool_fitness_scores,
-                                                                                            self.mutation_rate, param, num_population)
+                                                                                    self.mutation_rate, param, num_population, verbose)
                     population = next_gen_population
 
                 prev_phase_best_index = fitness_scores.argmax()
                 prev_phase_best = population[prev_phase_best_index]
 
-            return population, fitness_scores, prev_phase_best, prediction_scores
+            max_index = fitness_scores.argmax()
+            best_individual = population[max_index].model
+            best_prediction_score = prediction_scores[max_index]
+            print("Best Model Summary: ", best_individual.summary())
+            print("Best Prediction Score: ", best_prediction_score)
+            return best_individual, best_prediction_score
 
         except LengthError as error:
             return error 

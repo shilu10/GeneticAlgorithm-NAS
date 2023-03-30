@@ -1,6 +1,6 @@
 import random 
 import numpy as np
-from errors import *
+from .errors import *
 
 def mutate(individual, param):
     """
