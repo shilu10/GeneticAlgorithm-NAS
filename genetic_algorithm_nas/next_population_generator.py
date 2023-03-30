@@ -1,10 +1,12 @@
-from errors import *    
-from mutation import * 
-from crossover import * 
+from .errors import *    
+from .mutation import * 
+from .crossover import * 
 import random 
 import numpy as np 
+from .organism import *
 
-def get_next_generation_population(population, fitness_score, mutation_rate, param, n_population): 
+def get_next_generation_population(population, fitness_score, mutation_rate, 
+                                                                param, n_population, verbose): 
     """
         This function used to generate a new individauls by combining genes of the parensts from old population.
         Params:
@@ -28,7 +30,6 @@ def get_next_generation_population(population, fitness_score, mutation_rate, par
         del pop_copy
         
         n_iter = int(n_population//2 - (n_individual_for_next_gen / 2))
-        print(n_iter, len(new_generation_population), "n_iter")
         for _ in range(n_iter): 
             parent_1, parent_2 = pick_parents(population, fitness_score)
             # Mutation.
@@ -56,7 +57,7 @@ def get_next_generation_population(population, fitness_score, mutation_rate, par
         if len(new_generation_population) != n_population: 
             raise LengthError("Length of new_generation_population array is not same as population")
             
-        print("[+] Successfully generated the next generation's population.")
+        print("[+] Successfully generated the next generation's population.") if verbose else None
         return new_generation_population
     
     except LengthError as error:

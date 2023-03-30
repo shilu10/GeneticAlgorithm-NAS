@@ -1,9 +1,10 @@
 import numpy as np 
-import tensorflow as tf 
-import tensorflow.keras as tf 
 import random 
 from tensorflow.keras.layers import Input, Add, Conv2D, BatchNormalization, GlobalAveragePooling2D, Dense
 from tensorflow.keras import Model 
+import tensorflow.keras as keras 
+import tensorflow as tf 
+from .errors import *
 
 class Organism: 
     """

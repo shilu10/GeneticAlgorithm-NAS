@@ -5,6 +5,8 @@ import tensorflow as tf
 import math 
 import tensorflow.keras as tf 
 from sklearn.metrics import accuracy_score
+from .errors import *
+from .organism import *
 
 class FitnessFunction: 
     def __init__(self): 
@@ -95,7 +97,7 @@ class FitnessFunction:
         except Exception as error:
             return error
 
-    def get_fitness_score(self, population, train_ds, test_ds, test_X, test_y): 
+    def get_fitness_score(self, population, train_ds, test_ds, test_X, test_y, verbose=False): 
         try: 
             fitness_scores = []
             """
@@ -109,7 +111,7 @@ class FitnessFunction:
                 trained_model = self.train_model(model, train_ds)
                 model_pred_score = self.get_prediction_score(trained_model, test_ds, test_X, test_y, True)
                 fitness_scores.append(model_pred_score)
-                print(f"      Successfully calculated the fitness score for individual: {index}")
+                print(f"      Successfully calculated the fitness score for individual: {index}") if verbose else None
 
             fitness_scores = np.array(fitness_scores)
             return np.array(fitness_scores / sum(fitness_scores)), fitness_scores

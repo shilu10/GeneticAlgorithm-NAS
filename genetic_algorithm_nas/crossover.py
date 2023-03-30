@@ -1,3 +1,7 @@
+import random 
+import numpy as np 
+from .errors import *
+
 def pick_parents(population, fitness_score): 
     """
         This function, will pick two parent chromosomes from the population.
