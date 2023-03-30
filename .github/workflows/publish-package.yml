@@ -1,17 +1,18 @@
-name: Python package
+name: Publish package
 
 ## Will run when commits pushed to main, ro when PR opened for merging commits into main
 on:
   push:
     branches:
       - master
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
       - uses: actions/checkout@v3
@@ -22,8 +23,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: "poetry"
+          
+      - name: Install dependencies
+        run: poetry install
+      - name: Test with Pytest
+        run: poetry run pytest
+
   release:
     needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -55,4 +63,3 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.pypi_secret }}
-          
